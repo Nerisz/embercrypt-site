@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0d0a12">
+<title>Ember Crypt — Baixe grátis</title>
+<meta name="description" content="Sobreviva 10 minutos. Derrote o Lorde Brasa. Ember Crypt, roguelite em pixel art para iPhone e Android.">
+<!--
+  One link for every bio: sends Android to Google Play and iPhone to the App Store, tagged with where
+  the visitor came from (?s=tiktok, ?s=instagram, ?s=x...). Desktop and "not live yet" show both buttons.
+
+  To switch a store on, edit CONFIG below:
+    status 'off'         -> button says "Em breve"
+    status 'preregister' -> Google Play pre-registration / App Store pre-order (same store page)
+    status 'live'        -> released
+  The App Store needs appleId (the number in the app's App Store URL) and, for tracking, the
+  provider token shown when you create a campaign link in App Store Connect.
+-->
+<style>
+  :root { --bg: #0d0a12; --panel: #1a1020; --ember: #f77622; --ember-2: #feae34; --bone: #e8dcc8; --dim: #9a8fa6; --red: #e43b44; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px;
+         background: radial-gradient(circle at 50% 35%, #2b1838, var(--bg) 70%); color: var(--bone);
+         font: 16px/1.5 ui-monospace, "SF Mono", Menlo, Consolas, monospace; text-align: center; }
+  main { width: 100%; max-width: 380px; }
+  h1 { margin: 0; font-size: 40px; line-height: 1; letter-spacing: 2px; }
+  h1 .e { color: var(--ember); text-shadow: 3px 3px 0 #a22633; }
+  h1 .c { color: var(--bone); text-shadow: 3px 3px 0 #5d6a8a; display: block; margin-top: 6px; }
+  .tag { margin: 18px 0 28px; color: var(--dim); }
+  .btn { display: block; margin: 0 0 14px; padding: 16px; border: 3px solid var(--ember); border-radius: 10px; background: var(--panel);
+         color: var(--bone); text-decoration: none; font-weight: 700; font-size: 18px; }
+  .btn small { display: block; font-weight: 400; font-size: 13px; color: var(--ember-2); margin-top: 2px; }
+  .btn.mine { background: var(--ember); color: var(--bg); border-color: var(--ember-2); }
+  .btn.mine small { color: var(--bg); }
+  .btn.off, .btn.off.mine { background: var(--panel); border-color: #3a2f45; color: var(--dim); pointer-events: none; }
+  .btn.off small, .btn.off.mine small { color: var(--dim); }
+  .note { color: var(--dim); font-size: 13px; margin-top: 20px; }
+  .note a { color: var(--ember-2); }
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="e">EMBER</span><span class="c">CRYPT</span></h1>
+  <p class="tag" id="tag">Sobreviva 10 minutos. Derrote o Lorde Brasa.</p>
+  <a class="btn off" id="android" href="#">Google Play<small>Em breve</small></a>
+  <a class="btn off" id="ios" href="#">App Store<small>Em breve</small></a>
+  <p class="note" id="note">Grátis. Feito no Brasil pela PoggoStudios 🇧🇷<br>Novidades no TikTok <a href="https://tiktok.com/@embercryptgame">@embercryptgame</a></p>
+  <noscript><p class="note">Procure "Ember Crypt" na Play Store ou na App Store.</p></noscript>
+</main>
+<script>
+const CONFIG = {
+  android: { status: 'off', packageId: 'com.guiatneris.embercrypt' },
+  ios: { status: 'off', appleId: '', providerToken: '' },
+};
+
+const pt = (navigator.language || 'pt').toLowerCase().startsWith('pt');
+const T = pt
+  ? { tag: 'Sobreviva 10 minutos. Derrote o Lorde Brasa.', off: 'Em breve', preregister: 'Pré-registre grátis', preorder: 'Reserve grátis', live: 'Baixe grátis',
+      note: 'Grátis. Feito no Brasil pela PoggoStudios 🇧🇷<br>Novidades no TikTok <a href="https://tiktok.com/@embercryptgame">@embercryptgame</a>' }
+  : { tag: 'Survive 10 minutes. Slay the Ember Lord.', off: 'Coming soon', preregister: 'Pre-register for free', preorder: 'Pre-order for free', live: 'Download for free',
+      note: 'Free to play. Made in Brazil by PoggoStudios 🇧🇷<br>News on TikTok <a href="https://tiktok.com/@embercryptgame">@embercryptgame</a>' };
+
+// Where the visitor came from: ?s=tiktok. Letters, digits, - and _ only, 30 characters (Apple's limit).
+const raw = new URLSearchParams(location.search).get('s') || 'direto';
+const source = /^[a-z0-9_-]{1,30}$/i.test(raw) ? raw.toLowerCase() : 'direto';
+
+function androidUrl() {
+  const referrer = `utm_source=${source}&utm_medium=social&utm_campaign=bio`;
+  return `https://play.google.com/store/apps/details?id=${CONFIG.android.packageId}&referrer=${encodeURIComponent(referrer)}`;
+}
+function iosUrl() {
+  if (!CONFIG.ios.appleId) return '';
+  const provider = CONFIG.ios.providerToken ? `&pt=${encodeURIComponent(CONFIG.ios.providerToken)}` : '';
+  return `https://apps.apple.com/app/id${CONFIG.ios.appleId}?mt=8&ct=${source}${provider}`;
+}
+
+const ua = navigator.userAgent;
+const isAndroid = /Android/.test(ua);
+// iPads report themselves as a Mac with a touch screen.
+const isIOS = !isAndroid && (/iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+
+const stores = {
+  android: { el: document.getElementById('android'), url: androidUrl(), status: CONFIG.android.status, pre: 'preregister', mine: isAndroid },
+  ios: { el: document.getElementById('ios'), url: iosUrl(), status: CONFIG.ios.status, pre: 'preorder', mine: isIOS },
+};
+// Without the App Store id there is no page to send people to yet.
+if (!stores.ios.url) stores.ios.status = 'off';
+
+document.getElementById('tag').textContent = T.tag;
+document.getElementById('note').innerHTML = T.note;
+
+for (const s of Object.values(stores)) {
+  const on = s.status === 'live' || s.status === 'preregister';
+  s.el.querySelector('small').textContent = s.status === 'live' ? T.live : on ? T[s.pre] : T.off;
+  if (on) { s.el.href = s.url; s.el.classList.remove('off'); }
+  if (s.mine) s.el.classList.add('mine');
+}
+
+// On a phone whose store is open, go straight there. Otherwise stay and show both buttons.
+const here = isIOS ? stores.ios : isAndroid ? stores.android : null;
+if (here && here.status !== 'off') location.replace(here.url);
+</script>
+</body>
+</html>
